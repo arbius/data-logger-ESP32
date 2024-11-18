@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paginated JSON Viewer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #121212;
+      color: #ffffff;
+    }
+    .data-container {
+      margin-top: 20px;
+    }
+    .pagination-controls {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+    button {
+      background-color: #1e88e5;
+      border: none;
+      padding: 10px 15px;
+      color: #ffffff;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:disabled {
+      background-color: #555555;
+      cursor: not-allowed;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      background-color: #333333;
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Paginated DHT Viewer</h1>
+<div class="pagination-controls">
+  <button id="prevBtn" onclick="fetchData(currentPage - 1)" disabled>Previous</button>
+  <span id="pageNumber">Page: 1</span>
+  <button id="nextBtn" onclick="fetchData(currentPage + 1)">Next</button>
+</div>
+<div class="data-container">
+  <ul id="dataList">Loading data...</ul>
+</div>
+
+<script>
+  let currentPage = 1;
+  const pageSize = 10;
+  async function fetchData(page) {
+    try {
+      const response = await fetch(`/entries?page=${page}&pageSize=${pageSize}`);
+      const data = await response.json();
+
+      if (response.ok) {
+        const dataList = document.getElementById('dataList');
+        dataList.innerHTML = '';  // Clear previous data
+
+        // Populate the unordered list with each entry
+        data.entries.forEach(entry => {
+          const listItem = document.createElement('li');
+          listItem.innerHTML = `
+            <strong>Timestamp:</strong> ${entry.timestamp} &nbsp;&nbsp;&nbsp;
+            <strong>Temperature:</strong> ${entry.temperature}°C &nbsp;&nbsp;&nbsp;
+            <strong>Humidity:</strong> ${entry.humidity}%
+            `;
+          dataList.appendChild(listItem);
+        });
+
+        // Update page number and navigation buttons
+        currentPage = page;
+        document.getElementById('pageNumber').textContent = `Page: ${currentPage}`;
+        document.getElementById('prevBtn').disabled = currentPage === 1;
+        document.getElementById('nextBtn').disabled = data.entries.length < pageSize;
+      } else {
+        document.getElementById('dataList').innerHTML = `<li>No data found</li>`;
+      }
+    } catch (error) {
+      document.getElementById('dataList').innerHTML = `<li>Error fetching data. Please try again later.</li>`;
+      console.error('Error:', error);
+    }
+  }
+
+  // Fetch initial data
+  fetchData(currentPage);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Temp & Humidity</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #f0f0f0;
+            margin: 20px;
+        }
+        ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+        ul li {
+            margin-bottom: 5px;
+        }
+        h1 {
+            color: #f0a500;
+        }
+        .json-formatter-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Local Temperature and Humidity</h1>
+    <div class="json-formatter-container" id="json-list"></div>
+
+    <script>
+        // Fetch JSON data from the server
+        function fetchData() {
+
+            fetch('/last-entry')
+                .then(response => response.json())
+                .then(data => {
+                    // Display the JSON data as an unordered list
+                    document.getElementById('json-list').innerHTML = createListFromJSON(data);
+                })
+                .catch(error => console.error('Error fetching JSON data:', error));
+        }
+
+        // Function to convert JSON data into an unordered list
+        function createListFromJSON(json) {
+            let ul = '<ul>';
+            for (let key in json) {
+                if (typeof json[key] === 'object' && !Array.isArray(json[key])) {
+                    // Nested object
+                    ul += `<li><strong>${key}:</strong> ${createListFromJSON(json[key])}</li>`;
+                } else if (Array.isArray(json[key])) {
+                    // Handle arrays
+                    ul += `<li><strong>${key}:</strong> <ul>`;
+                    json[key].forEach(item => {
+                        ul += `<li>${item}</li>`;
+                    });
+                    ul += '</ul></li>';
+                } else {
+                    // Basic key-value pairs
+                    ul += `<li><strong>${key}:</strong> ${json[key]}</li>`;
+                }
+            }
+            ul += '</ul>';
+            return ul;
+        }
+
+    fetchData();
+
+    // Set an interval to refresh every 15 minutes (900,000 milliseconds)
+    setInterval(() => {
+        location.reload();
+    }, 900000); // 900,000 ms = 15 minutes
+
+    </script>
+
+</body>
+</html>
