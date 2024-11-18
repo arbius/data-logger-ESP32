@@ -5,17 +5,11 @@ print ('entering shell3')
 import os
 import cat
 
-# dthmain.main()
-os.listdir()
+#os.listdir()
 # cat.cat('unsent_data.json')
 
 
 import dth
-# import getjson
-
-
-
-
 
 print ('done with shell3')
 
